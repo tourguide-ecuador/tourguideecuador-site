@@ -3,6 +3,7 @@ import Breadcrumbs from './Breadcrumbs.astro';
 import TourCard from './TourCard.astro';
 import { getTours, getTourTypes, getDestinations } from '../lib/content';
 import { getLangFromUrl, localizePath } from '../i18n/ui';
+import { SITE } from '../lib/site';
 
 const lang = getLangFromUrl(Astro.url);
 const es = lang === 'es';
@@ -14,6 +15,8 @@ const usedTypeIds = new Set(tours.map((t) => t.data.type.id));
 const filters = types.filter((t) => usedTypeIds.has(t.id));
 const usedDestIds = new Set(tours.map((t) => t.data.destination.id));
 const destOptions = destinations.filter((d) => usedDestIds.has(d.id));
+const isLive = (t: (typeof tours)[number]) => Boolean(t.data.bokunExperienceId && SITE.bokunChannelId);
+const anyLive = tours.some(isLive);
 const durKey = (l?: string) => {
   const s = (l ?? '').toLowerCase();
   if (s.includes('multi')) return 'multi';
@@ -36,6 +39,7 @@ const tr = {
   full: es ? 'Día completo' : 'Full day',
   multi: es ? 'Varios días' : 'Multi-day',
   sort: es ? 'Ordenar' : 'Sort',
+  bookOnline: es ? 'Reserva online' : 'Book online',
   featured: es ? 'Destacados' : 'Featured',
   az: es ? 'Nombre A–Z' : 'Name A–Z',
   za: es ? 'Nombre Z–A' : 'Name Z–A',
@@ -79,6 +83,9 @@ const tr = {
         <option value="za">{tr.za}</option>
       </select>
     </label>
+    {anyLive && (
+      <button type="button" id="filter-online" class="filter-chip !py-1.5" aria-pressed="false">{tr.bookOnline}</button>
+    )}
     <span id="result-count" class="text-sm font-medium text-ink-500"></span>
   </div>
 
@@ -86,7 +93,8 @@ const tr = {
     {tours.map((t, i) => (
       <div data-card data-order={i}
            data-types={[t.data.type.id, ...(t.data.secondaryTypes?.map((s) => s.id) ?? [])].join(' ')}
-           data-dest={t.data.destination.id} data-dur={durKey(t.data.durationLabel)} data-name={t.data.title}>
+           data-dest={t.data.destination.id} data-dur={durKey(t.data.durationLabel)} data-name={t.data.title}
+           data-online={isLive(t) ? '1' : '0'}>
         <TourCard tour={t} />
       </div>
     ))}
@@ -109,6 +117,8 @@ const tr = {
     const durSel = document.getElementById('filter-dur') as HTMLSelectElement;
     const sortSel = document.getElementById('sort-tours') as HTMLSelectElement;
     const empty = document.getElementById('no-results');
+    const onlineBtn = document.getElementById('filter-online');
+    let onlineOnly = false;
     const count = document.getElementById('result-count');
     const word = empty?.dataset.word ?? 'tours';
     let type = 'all';
@@ -118,7 +128,8 @@ const tr = {
         const okType = type === 'all' || (c.dataset.types ?? '').split(' ').includes(type);
         const okDest = destSel.value === 'all' || c.dataset.dest === destSel.value;
         const okDur = durSel.value === 'all' || c.dataset.dur === durSel.value;
-        const match = okType && okDest && okDur;
+        const okOnline = !onlineOnly || c.dataset.online === '1';
+        const match = okType && okDest && okDur && okOnline;
         c.hidden = !match;
         if (match) shown++;
       });
@@ -131,6 +142,12 @@ const tr = {
       if (empty) empty.hidden = shown !== 0;
       if (count) count.textContent = `${shown} ${word}`;
     }
+    onlineBtn?.addEventListener('click', () => {
+      onlineOnly = !onlineOnly;
+      onlineBtn.classList.toggle('is-active', onlineOnly);
+      onlineBtn.setAttribute('aria-pressed', String(onlineOnly));
+      apply();
+    });
     chips.forEach((chip) => chip.addEventListener('click', () => {
       type = chip.dataset.typeFilter!;
       chips.forEach((c) => c.classList.toggle('is-active', c === chip));
