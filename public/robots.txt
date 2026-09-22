@@ -1,4 +1,4 @@
-# Tour Guide Ecuador — permissive (English-only v1, no hreflang).
+# Tour Guide Ecuador — crawl everything except the content editor.
 User-agent: *
 Allow: /
 Disallow: /keystatic

@@ -22,7 +22,7 @@ export function travelAgencySchema(rating?: { value: number; count: number }) {
       addressCountry: 'EC',
     },
     areaServed: ['Galápagos Islands', 'Ecuador'],
-    sameAs: [SITE.whatsappHref],
+    sameAs: [SITE.whatsappHref, SITE.tripadvisorUrl, SITE.instagramUrl, SITE.facebookUrl].filter(Boolean),
     ...(rating && rating.count
       ? {
           aggregateRating: {
@@ -63,7 +63,7 @@ export function productSchema(opts: {
 }
 
 export function touristTripSchema(opts: {
-  name: string; description: string; image?: string; url: string;
+  name: string; description: string; image?: string; url: string; touristType?: string;
 }) {
   return {
     '@context': 'https://schema.org',
@@ -73,7 +73,7 @@ export function touristTripSchema(opts: {
     ...(opts.image ? { image: opts.image } : {}),
     url: opts.url,
     provider: { '@id': ORG_ID },
-    touristType: 'Galápagos cruise travellers',
+    ...(opts.touristType ? { touristType: opts.touristType } : {}),
   };
 }
 

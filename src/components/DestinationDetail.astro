@@ -41,7 +41,7 @@ const toursLabel = es
   <section class="container-page py-16">
     <h2 class="font-display text-2xl sm:text-3xl">{t('nav.cruises')}</h2>
     <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{cruises.slice(0, 6).map((c) => <CruiseCard cruise={c} />)}</div>
-    <a href={L('/cruises')} class="btn btn-outline mt-8">{es ? 'Ver los 13 cruceros →' : 'See all 13 cruises →'}</a>
+    <a href={L('/cruises')} class="btn btn-outline mt-8">{es ? `Ver los ${cruises.length} cruceros →` : `See all ${cruises.length} cruises →`}</a>
   </section>
 )}
 

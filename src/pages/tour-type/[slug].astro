@@ -1,15 +1,19 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { shareImage } from '../../lib/og';
+import { assertUniqueSlugs } from '../../lib/slugs';
 import TourTypeDetail from '../../components/TourTypeDetail.astro';
 import { getTourTypes, tourTypeUrl } from '../../lib/content';
 
 export async function getStaticPaths() {
   const types = await getTourTypes();
+  assertUniqueSlugs(types);
   return types.map((type) => ({ params: { slug: type.data.slug }, props: { type } }));
 }
 const { type } = Astro.props;
 const d = type.data;
+const image = await shareImage(d.heroImage);
 ---
-<SiteLayout localized title={d.metaTitle} description={d.metaDescription} canonicalPath={tourTypeUrl(d.slug)}>
+<SiteLayout localized title={d.metaTitle} description={d.metaDescription} image={image} canonicalPath={tourTypeUrl(d.slug)}>
   <TourTypeDetail type={type} />
 </SiteLayout>

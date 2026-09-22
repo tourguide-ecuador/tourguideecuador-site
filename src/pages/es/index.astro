@@ -7,15 +7,16 @@ import DestinationCard from '../../components/DestinationCard.astro';
 import ReviewCard from '../../components/ReviewCard.astro';
 import CredibilityStrip from '../../components/CredibilityStrip.astro';
 import { SITE } from '../../lib/site';
-import { featuredCruises, featuredTours, featuredDestinations, getReviews, aggregateRating } from '../../lib/content';
+import { featuredCruises, featuredTours, featuredDestinations, homeReviews, aggregateRating, getCruises } from '../../lib/content';
 import hero from '../../assets/site/hero-cotopaxi.jpg';
 import JsonLd from '../../components/JsonLd.astro';
 import { travelAgencySchema } from '../../lib/schema';
 
 const cruises = await featuredCruises();
+const cruiseCount = (await getCruises()).length;
 const tours = await featuredTours();
 const destinations = await featuredDestinations();
-const reviews = (await getReviews()).slice(0, 3);
+const reviews = await homeReviews();
 const rating = await aggregateRating();
 ---
 <SiteLayout
@@ -54,7 +55,7 @@ const rating = await aggregateRating();
         <p class="eyebrow">Las Islas Encantadas</p>
         <h2 class="mt-3 text-[var(--text-display)]">Cruceros destacados a Galápagos</h2>
       </div>
-      <a href="/es/cruises" class="btn btn-outline">Las 13 embarcaciones →</a>
+      <a href="/es/cruises" class="btn btn-outline">Las {cruiseCount} embarcaciones →</a>
     </div>
     <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal-stagger>
       {cruises.map((c, i) => <CruiseCard cruise={c} featured={i === 0} class={i === 0 ? 'lg:row-span-2 lg:col-span-1' : ''} />)}

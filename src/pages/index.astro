@@ -7,7 +7,7 @@ import DestinationCard from '../components/DestinationCard.astro';
 import ReviewCard from '../components/ReviewCard.astro';
 import { SITE } from '../lib/site';
 import {
-  featuredCruises, featuredTours, featuredDestinations, getReviews, aggregateRating,
+  featuredCruises, featuredTours, featuredDestinations, homeReviews, aggregateRating, getCruises,
 } from '../lib/content';
 import hero from '../assets/site/hero-cotopaxi.jpg';
 import CredibilityStrip from '../components/CredibilityStrip.astro';
@@ -15,9 +15,10 @@ import JsonLd from '../components/JsonLd.astro';
 import { travelAgencySchema } from '../lib/schema';
 
 const cruises = await featuredCruises();
+const cruiseCount = (await getCruises()).length;
 const tours = await featuredTours();
 const destinations = await featuredDestinations();
-const reviews = (await getReviews()).slice(0, 3);
+const reviews = await homeReviews();
 const rating = await aggregateRating();
 ---
 <SiteLayout
@@ -44,7 +45,7 @@ const rating = await aggregateRating();
       </p>
       <div class="reveal mt-9 flex flex-wrap items-center gap-4" style="animation-delay:.28s">
         <a href={SITE.hero.ctaPrimaryHref} class="btn btn-primary !px-7 !py-4 text-base">{SITE.hero.ctaPrimaryLabel}</a>
-        <a href={SITE.hero.ctaSecondaryHref} class="btn btn-ghost !px-7 !py-4 text-base">{SITE.hero.ctaSecondaryLabel}</a>
+        {SITE.hero.ctaSecondaryLabel && SITE.hero.ctaSecondaryHref && <a href={SITE.hero.ctaSecondaryHref} class="btn btn-ghost !px-7 !py-4 text-base">{SITE.hero.ctaSecondaryLabel}</a>}
       </div>
     </div>
   </section>
@@ -59,7 +60,7 @@ const rating = await aggregateRating();
         <p class="eyebrow">The Enchanted Islands</p>
         <h2 class="mt-3 text-[var(--text-display)]">Featured Galápagos cruises</h2>
       </div>
-      <a href="/cruises" class="btn btn-outline">All 13 vessels →</a>
+      <a href="/cruises" class="btn btn-outline">All {cruiseCount} vessels →</a>
     </div>
     <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal-stagger>
       {cruises.map((c, i) => <CruiseCard cruise={c} featured={i === 0} class={i === 0 ? 'lg:row-span-2 lg:col-span-1' : ''} />)}

@@ -8,12 +8,14 @@ import CredibilityStrip from './CredibilityStrip.astro';
 import UntranslatedNotice from './UntranslatedNotice.astro';
 import JsonLd from './JsonLd.astro';
 import { SITE } from '../lib/site';
+import { shareImage } from '../lib/og';
 import { touristTripSchema } from '../lib/schema';
 import { getLangFromUrl } from '../i18n/ui';
 import type { Cruise } from '../lib/content';
 interface Props { cruise: Cruise }
 const { cruise } = Astro.props;
 const d = cruise.data;
+const image = await shareImage(d.heroImage);
 const { Content } = await render(cruise);
 const overviewLabel = getLangFromUrl(Astro.url) === 'es' ? 'Resumen del crucero' : 'Cruise overview';
 const url = `/${d.slug}`;
@@ -25,7 +27,7 @@ const specs = [
   ...(d.specs ?? []),
 ].filter(Boolean) as { label: string; value: string }[];
 ---
-<JsonLd slot="head" schema={touristTripSchema({ name: d.title, description: d.metaDescription, url: `${SITE.url}${url}` })} />
+<JsonLd slot="head" schema={touristTripSchema({ name: d.title, description: d.metaDescription, image, url: `${SITE.url}${url}`, touristType: 'Galápagos cruise travellers' })} />
 
 <!-- Immersive hero -->
 <section class="relative isolate flex min-h-[78svh] items-end overflow-hidden bg-ink-950">

@@ -1,4 +1,5 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
+import { RESERVED_ROOT_SLUGS } from './src/lib/slugs';
 
 /*
   Keystatic — content editor for Tour Guide Ecuador.
@@ -25,6 +26,33 @@ const storage = import.meta.env.DEV
       ? ({ kind: 'cloud' } as const)
       : ({ kind: 'local' } as const);
 
+// URL slugs feed the routes: a "/" or a space breaks the build. Cruises and pages sit at
+// the site root, so they also can't reuse a built-in page's name.
+const slugPattern = (reserved: string[] = []) => ({
+  regex: new RegExp(`^${reserved.length ? `(?!(?:${reserved.join('|')})$)` : ''}[a-z0-9]+(?:-[a-z0-9]+)*$`),
+  message: reserved.length
+    ? 'Lowercase letters, numbers and hyphens only (e.g. grand-majestic), and not a built-in page name such as "tours" or "reviews".'
+    : 'Lowercase letters, numbers and hyphens only (e.g. cotopaxi). No spaces or slashes.',
+});
+const urlSlug = (reserved?: string[], description?: string) =>
+  fields.text({
+    label: 'URL slug (preserve old)',
+    ...(description ? { description } : {}),
+    validation: { length: { min: 1 }, pattern: slugPattern(reserved) },
+  });
+const title = (label = 'Title') => fields.slug({ name: { label, validation: { isRequired: true } } });
+
+// Astro can only process these formats — anything else (e.g. iPhone HEIC) fails the build.
+const IMAGE_HINT = "JPG, PNG or WebP. iPhone HEIC photos won't work — export them as JPG first.";
+
+// Images inserted into a body are stored next to the entry's hero/gallery photos so Astro
+// can resolve and optimise them (without this, the first body image breaks the build).
+const body = (dir: string | null, label = 'Body') =>
+  fields.mdx({
+    label,
+    options: { image: dir ? { directory: `src/assets/${dir}`, publicPath: `../../assets/${dir}/` } : false },
+  });
+
 const seoFields = {
   metaTitle: fields.text({ label: 'Meta title', validation: { length: { min: 1 } }, description: 'SEO <title> (carried from old site).' }),
   metaDescription: fields.text({
@@ -38,6 +66,7 @@ const seoFields = {
 const heroFields = (dir: string, required = false) => ({
   heroImage: fields.image({
     label: 'Hero image',
+    description: IMAGE_HINT,
     directory: `src/assets/${dir}`,
     publicPath: `../../assets/${dir}/`,
     validation: { isRequired: required },
@@ -47,7 +76,7 @@ const heroFields = (dir: string, required = false) => ({
 
 const gallery = (dir: string) =>
   fields.array(
-    fields.image({ label: 'Photo', directory: `src/assets/${dir}`, publicPath: `../../assets/${dir}/` }),
+    fields.image({ label: 'Photo', description: IMAGE_HINT, directory: `src/assets/${dir}`, publicPath: `../../assets/${dir}/` }),
     { label: 'Gallery', itemLabel: (props) => props.value?.filename ?? 'Photo' },
   );
 
@@ -68,11 +97,11 @@ export default config({
       path: 'src/data/settings',
       format: { data: 'json' },
       schema: {
-        name: fields.text({ label: 'Business name' }),
+        name: fields.text({ label: 'Business name', validation: { length: { min: 1 } } }),
         tagline: fields.text({ label: 'Tagline' }),
-        email: fields.text({ label: 'Contact email' }),
-        whatsappNumber: fields.text({ label: 'WhatsApp number', description: 'Digits only, country code first (e.g. 593991946532).' }),
-        address: fields.text({ label: 'Address' }),
+        email: fields.text({ label: 'Contact email', validation: { length: { min: 1 }, pattern: { regex: /^[^@\s]+@[^@\s]+\.[^@\s]+$/, message: 'Enter a valid email address.' } } }),
+        whatsappNumber: fields.text({ label: 'WhatsApp number', description: 'Digits only, country code first (e.g. 593991946532).', validation: { pattern: { regex: /^\d{8,15}$/, message: 'Digits only, country code first — no spaces or +.' } } }),
+        address: fields.text({ label: 'Address', validation: { length: { min: 1 } } }),
         city: fields.text({ label: 'City' }),
         country: fields.text({ label: 'Country' }),
         nytQuote: fields.text({ label: 'Press / trust line', description: 'e.g. "Recommended by The New York Times".' }),
@@ -83,10 +112,10 @@ export default config({
         hero: fields.object(
           {
             eyebrow: fields.text({ label: 'Eyebrow' }),
-            heading: fields.text({ label: 'Heading', multiline: true }),
-            subheading: fields.text({ label: 'Subheading', multiline: true }),
-            ctaPrimaryLabel: fields.text({ label: 'Primary button label' }),
-            ctaPrimaryHref: fields.text({ label: 'Primary button link' }),
+            heading: fields.text({ label: 'Heading', multiline: true, validation: { length: { min: 1 } } }),
+            subheading: fields.text({ label: 'Subheading', multiline: true, validation: { length: { min: 1 } } }),
+            ctaPrimaryLabel: fields.text({ label: 'Primary button label', validation: { length: { min: 1 } } }),
+            ctaPrimaryHref: fields.text({ label: 'Primary button link', validation: { length: { min: 1 } } }),
             ctaSecondaryLabel: fields.text({ label: 'Secondary button label' }),
             ctaSecondaryHref: fields.text({ label: 'Secondary button link' }),
           },
@@ -104,8 +133,8 @@ export default config({
       entryLayout: 'content',
       columns: ['title', 'destination'],
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        slug: fields.text({ label: 'URL slug (preserve old)', description: 'Old WordPress slug for 301s.', validation: { length: { min: 1 } } }),
+        title: title(),
+        slug: urlSlug(undefined, 'Old WordPress slug for 301s.'),
         destination: fields.relationship({ label: 'Destination', collection: 'destinations', validation: { isRequired: true } }),
         type: fields.relationship({ label: 'Primary tour type', collection: 'tourTypes', validation: { isRequired: true } }),
         secondaryTypes: fields.array(
@@ -120,7 +149,7 @@ export default config({
         ...heroFields('tours', true),
         gallery: gallery('tours'),
         ...seoFields,
-        content: fields.mdx({ label: 'Body' }),
+        content: body('tours'),
       },
     }),
     cruises: collection({
@@ -131,8 +160,8 @@ export default config({
       entryLayout: 'content',
       columns: ['title', 'vesselClass'],
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        slug: fields.text({ label: 'URL slug (preserve old)', validation: { length: { min: 1 } } }),
+        title: title(),
+        slug: urlSlug(RESERVED_ROOT_SLUGS),
         vesselClass: fields.select({
           label: 'Vessel class',
           options: [
@@ -152,7 +181,7 @@ export default config({
         ...heroFields('cruises', true),
         gallery: gallery('cruises'),
         ...seoFields,
-        content: fields.mdx({ label: 'Body' }),
+        content: body('cruises'),
       },
     }),
     destinations: collection({
@@ -162,13 +191,13 @@ export default config({
       format: { contentField: 'content' },
       entryLayout: 'content',
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        slug: fields.text({ label: 'URL slug (preserve old)', validation: { length: { min: 1 } } }),
+        title: title(),
+        slug: urlSlug(),
         excerpt: fields.text({ label: 'Excerpt', multiline: true, validation: { length: { min: 1 } } }),
         featured: fields.checkbox({ label: 'Featured on homepage' }),
         ...heroFields('destinations'),
         ...seoFields,
-        content: fields.mdx({ label: 'Body' }),
+        content: body('destinations'),
       },
     }),
     tourTypes: collection({
@@ -178,12 +207,12 @@ export default config({
       format: { contentField: 'content' },
       entryLayout: 'content',
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        slug: fields.text({ label: 'URL slug (preserve old)', validation: { length: { min: 1 } } }),
+        title: title(),
+        slug: urlSlug(),
         excerpt: fields.text({ label: 'Excerpt', multiline: true, validation: { length: { min: 1 } } }),
         ...heroFields('tourTypes'),
         ...seoFields,
-        content: fields.mdx({ label: 'Body' }),
+        content: body('tourTypes'),
       },
     }),
     pages: collection({
@@ -193,11 +222,11 @@ export default config({
       format: { contentField: 'content' },
       entryLayout: 'content',
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        slug: fields.text({ label: 'URL slug (preserve old)', validation: { length: { min: 1 } } }),
+        title: title(),
+        slug: urlSlug(RESERVED_ROOT_SLUGS),
         ...heroFields('pages'),
         ...seoFields,
-        content: fields.mdx({ label: 'Body' }),
+        content: body('pages'),
       },
     }),
     reviews: collection({
@@ -208,14 +237,14 @@ export default config({
       entryLayout: 'content',
       columns: ['author', 'location'],
       schema: {
-        author: fields.slug({ name: { label: 'Author' } }),
+        author: title('Author'),
         location: fields.text({ label: 'Location' }),
         date: fields.text({ label: 'Date' }),
         rating: fields.number({ label: 'Rating (1–5)', defaultValue: 5, validation: { isRequired: true, min: 1, max: 5 } }),
         tour: fields.text({ label: 'Tour (optional)' }),
         featured: fields.checkbox({ label: 'Featured' }),
         oldSlug: fields.text({ label: 'Old review slug (for 301)' }),
-        content: fields.mdx({ label: 'Testimonial' }),
+        content: body(null, 'Testimonial'),
       },
     }),
     faqs: collection({
@@ -225,7 +254,7 @@ export default config({
       format: { contentField: 'content' },
       columns: ['question', 'category'],
       schema: {
-        question: fields.slug({ name: { label: 'Question' } }),
+        question: title('Question'),
         category: fields.select({
           label: 'Category',
           options: [
@@ -237,7 +266,7 @@ export default config({
           defaultValue: 'cruises',
         }),
         order: fields.number({ label: 'Order', defaultValue: 0 }),
-        content: fields.mdx({ label: 'Answer' }),
+        content: body(null, 'Answer'),
       },
     }),
   },

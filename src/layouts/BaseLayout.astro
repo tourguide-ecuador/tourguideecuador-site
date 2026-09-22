@@ -78,7 +78,7 @@ const ogLocaleAlt = lang === 'es' ? 'en_US' : 'es_ES';
       // ── runs on first load AND after every View Transition navigation ──
       function setupReveals() {
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const targets = document.querySelectorAll('.reveal-up, [data-reveal-stagger]');
+        const targets = document.querySelectorAll('[data-reveal-stagger]');
         if (reduce || !('IntersectionObserver' in window)) {
           targets.forEach((el) => el.setAttribute('data-revealed', ''));
           return;

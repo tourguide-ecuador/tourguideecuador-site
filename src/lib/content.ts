@@ -17,6 +17,11 @@ export const getReviews = async () => getCollection('reviews');
 export const featuredTours = async () => (await getTours()).filter((t) => t.data.featured);
 export const featuredCruises = async () => (await getCruises()).filter((c) => c.data.featured);
 export const featuredDestinations = async () => (await getDestinations()).filter((d) => d.data.featured);
+/** Homepage testimonials: reviews ticked "Featured" in the editor first, then the rest. */
+export const homeReviews = async (n = 3) => {
+  const all = await getReviews();
+  return [...all.filter((r) => r.data.featured), ...all.filter((r) => !r.data.featured)].slice(0, n);
+};
 
 export async function aggregateRating() {
   const reviews = await getReviews();

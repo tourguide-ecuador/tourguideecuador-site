@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../../../layouts/SiteLayout.astro';
+import { shareImage } from '../../../lib/og';
 import TourDetail from '../../../components/TourDetail.astro';
 import { getTours, tourUrl } from '../../../lib/content';
 import { localizePath } from '../../../i18n/ui';
@@ -10,7 +11,8 @@ export async function getStaticPaths() {
 }
 const { tour } = Astro.props;
 const d = tour.data;
+const image = await shareImage(d.heroImage);
 ---
-<SiteLayout localized title={d.metaTitle} description={d.metaDescription} canonicalPath={localizePath(tourUrl(d.slug), 'es')}>
+<SiteLayout localized title={d.metaTitle} description={d.metaDescription} image={image} canonicalPath={localizePath(tourUrl(d.slug), 'es')}>
   <TourDetail tour={tour} />
 </SiteLayout>

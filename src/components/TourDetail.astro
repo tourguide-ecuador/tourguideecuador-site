@@ -1,27 +1,31 @@
 ---
 import { Image } from 'astro:assets';
-import { render } from 'astro:content';
+import { render, getEntry } from 'astro:content';
 import Breadcrumbs from './Breadcrumbs.astro';
 import BokunWidget from './BokunWidget.astro';
 import Gallery from './Gallery.astro';
 import TourCard from './TourCard.astro';
 import UntranslatedNotice from './UntranslatedNotice.astro';
 import JsonLd from './JsonLd.astro';
-import { getTours, destinationName, tourTypeName, tourUrl, destinationUrl } from '../lib/content';
-import { productSchema } from '../lib/schema';
+import { getTours, tourTypeName, tourUrl, destinationUrl } from '../lib/content';
+import { productSchema, touristTripSchema } from '../lib/schema';
 import { SITE } from '../lib/site';
+import { shareImage } from '../lib/og';
 import { getLangFromUrl, useTranslations, localizePath } from '../i18n/ui';
 import type { Tour } from '../lib/content';
 
 interface Props { tour: Tour }
 const { tour } = Astro.props;
 const d = tour.data;
+const image = await shareImage(d.heroImage);
 const lang = getLangFromUrl(Astro.url);
 const es = lang === 'es';
 const t = useTranslations(lang);
 const L = (p: string) => localizePath(p, lang);
 const { Content } = await render(tour);
-const dest = await destinationName(d.destination.id);
+const destEntry = await getEntry(d.destination);
+const dest = destEntry?.data.title ?? d.destination.id;
+const destPath = destinationUrl(destEntry?.data.slug ?? d.destination.id); // route uses the URL slug, not the file name
 const type = await tourTypeName(d.type.id);
 const allTours = await getTours();
 const related = allTours.filter((x) => x.data.destination.id === d.destination.id && x.id !== tour.id).slice(0, 4);
@@ -43,13 +47,16 @@ const facts = [
   { label: es ? 'Salida desde' : 'Departs from', value: es ? 'Quito (o tu hotel)' : 'Quito (or your hotel)' },
 ].filter(Boolean) as { label: string; value: string }[];
 ---
-<JsonLd slot="head" schema={productSchema({ name: d.title, description: d.metaDescription, url: `${SITE.url}${canonical}`, priceFrom: d.priceFrom })} />
+<JsonLd slot="head" schema={d.priceFrom
+  ? productSchema({ name: d.title, description: d.metaDescription, image, url: `${SITE.url}${canonical}`, priceFrom: d.priceFrom })
+  // Google rejects a Product with no offer/rating, so describe unpriced tours as trips.
+  : touristTripSchema({ name: d.title, description: d.metaDescription, image, url: `${SITE.url}${canonical}` })} />
 
 <section class="relative isolate overflow-hidden bg-ink-900">
   <Image src={d.heroImage} alt={d.heroImageAlt ?? d.title} widths={[768, 1280, 1800]} sizes="100vw" transition:name={`tour-img-${d.slug}`} class="absolute inset-0 h-full w-full object-cover opacity-70" loading="eager" fetchpriority="high" />
   <div class="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/40 to-ink-950/30"></div>
   <div class="container-page relative py-16 text-white sm:py-24">
-    <div class="[&_*]:!text-white/80"><Breadcrumbs items={[{ name: tr.tours, url: L('/tours') }, { name: dest, url: L(destinationUrl(d.destination.id)) }, { name: d.title, url: canonical }]} /></div>
+    <div class="[&_*]:!text-white/80"><Breadcrumbs items={[{ name: tr.tours, url: L('/tours') }, { name: dest, url: L(destPath) }, { name: d.title, url: canonical }]} /></div>
     <p class="eyebrow mt-6 text-brand-300">{type}</p>
     <h1 class="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5vw,3.6rem)] font-medium text-white">{d.title}</h1>
     <p class="mt-4 max-w-2xl text-lg text-white/85">{d.excerpt}</p>

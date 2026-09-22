@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { shareImage } from '../../lib/og';
 import CruiseArticle from '../../components/CruiseArticle.astro';
 import PageArticle from '../../components/PageArticle.astro';
 
@@ -24,12 +25,13 @@ type SlugProps =
   | { kind: 'page'; page: CollectionEntry<'pages'> };
 const props = Astro.props as SlugProps;
 const data = props.kind === 'cruise' ? props.cruise.data : props.page.data;
+const image = await shareImage(data.heroImage);
 const canonical = `/es/${data.slug}`;
 ---
 <SiteLayout
   localized
   title={data.metaTitle}
-  description={data.metaDescription}
+  description={data.metaDescription} image={image}
   canonicalPath={canonical}
   overlayHeader={props.kind === 'cruise'}
 >

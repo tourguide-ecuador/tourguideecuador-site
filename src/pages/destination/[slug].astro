@@ -1,15 +1,19 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import { shareImage } from '../../lib/og';
+import { assertUniqueSlugs } from '../../lib/slugs';
 import DestinationDetail from '../../components/DestinationDetail.astro';
 import { getDestinations, destinationUrl } from '../../lib/content';
 
 export async function getStaticPaths() {
   const destinations = await getDestinations();
+  assertUniqueSlugs(destinations);
   return destinations.map((destination) => ({ params: { slug: destination.data.slug }, props: { destination } }));
 }
 const { destination } = Astro.props;
 const d = destination.data;
+const image = await shareImage(d.heroImage);
 ---
-<SiteLayout localized title={d.metaTitle} description={d.metaDescription} canonicalPath={destinationUrl(d.slug)}>
+<SiteLayout localized title={d.metaTitle} description={d.metaDescription} image={image} canonicalPath={destinationUrl(d.slug)}>
   <DestinationDetail destination={destination} />
 </SiteLayout>

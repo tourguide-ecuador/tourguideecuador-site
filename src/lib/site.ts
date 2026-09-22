@@ -52,14 +52,5 @@ export const SITE = {
   hero: settings.hero,
 } as const;
 
-export const NAV = [
-  { label: 'Galápagos Cruises', href: '/cruises' },
-  { label: 'Ecuador Tours', href: '/tours' },
-  { label: 'Destinations', href: '/destinations' },
-  { label: 'When to go', href: '/galapagos-wildlife-calendar' },
-  { label: 'Reviews', href: '/reviews' },
-  { label: 'About', href: '/about-us' },
-] as const;
-
 export const whatsappLink = (text?: string) =>
   text ? `${SITE.whatsappHref}?text=${encodeURIComponent(text)}` : SITE.whatsappHref;
