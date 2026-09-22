@@ -30,12 +30,15 @@ const type = await tourTypeName(d.type.id);
 const allTours = await getTours();
 const related = allTours.filter((x) => x.data.destination.id === d.destination.id && x.id !== tour.id).slice(0, 4);
 const canonical = L(tourUrl(d.slug));
+const liveBooking = Boolean(d.bokunExperienceId && SITE.bokunChannelId);
 const tr = {
   tours: t('nav.tours'),
   gallery: es ? 'Galería' : 'Gallery',
   pricing: es ? 'Precio' : 'Pricing',
   from: t('label.from'),
   onRequest: t('label.onRequest'),
+  liveBooking: es ? 'Reserva en línea' : 'Book online',
+  liveBookingNote: es ? 'Precios y disponibilidad en vivo' : 'Live prices & availability',
   ask: es ? 'Pregunta por WhatsApp' : 'Ask a question on WhatsApp',
   moreIn: es ? `Más en ${dest}` : `More in ${dest}`,
   overview: es ? 'Resumen del tour' : 'Tour overview',
@@ -79,8 +82,8 @@ const facts = [
   <aside class="lg:sticky lg:top-[calc(var(--header-h,4.75rem)+1.5rem)] lg:self-start">
     <div class="rounded-2xl border border-sand-300 bg-white p-5 shadow-card">
       <div class="flex items-baseline justify-between">
-        <span class="text-sm text-ink-500">{d.priceFrom ? tr.from : tr.pricing}</span>
-        <span class="font-display text-2xl text-ink-900">{d.priceFrom ? `$${d.priceFrom}` : tr.onRequest}</span>
+        <span class="text-sm text-ink-500">{d.priceFrom ? tr.from : liveBooking ? tr.liveBooking : tr.pricing}</span>
+        <span class="font-display text-2xl text-ink-900">{d.priceFrom ? `$${d.priceFrom}` : liveBooking ? tr.liveBookingNote : tr.onRequest}</span>
       </div>
       <hr class="rule my-4" />
       <BokunWidget experienceId={d.bokunExperienceId} title={d.title} />

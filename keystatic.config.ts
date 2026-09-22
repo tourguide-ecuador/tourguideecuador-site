@@ -155,7 +155,7 @@ export default config({
         priceFrom: fields.number({ label: 'Price from (USD) — optional, via Bokun' }),
         bokunExperienceId: fields.text({
           label: 'Bókun experience ID',
-          description: 'The number from Bókun → Experiences (e.g. 1286086), without the #. Add it only once the experience is Active in Bókun.',
+          description: 'The number from Bókun → Experiences (e.g. 1286086), without the #. The booking box goes live as soon as the experience is Active in Bókun and in the website booking channel.',
           validation: { pattern: { regex: /^\d*$/, message: 'Digits only, e.g. 1286086 (no # or spaces).' } },
         }),
         featured: fields.checkbox({ label: 'Featured on homepage' }),
