@@ -1,60 +1,89 @@
 ---
 import { SITE } from '../lib/site';
+import { getLangFromUrl, localizePath } from '../i18n/ui';
 /*
-  Bókun day-tour booking widget shell.
-  Real bookings render once the client supplies each experience's Bókun ID
-  (frontmatter `bokunExperienceId`) and the channel UUID (Site settings → Bókun booking
-  channel UUID, or the PUBLIC_BOKUN_CHANNEL_ID env var).
-  Until then we show a clean "request to book" placeholder so the page is complete.
+  Bókun day-tour booking widget.
+  Live bookings render once the tour has a Bókun experience ID (frontmatter
+  `bokunExperienceId`) and the channel UUID is set (Site settings → Bókun booking channel
+  UUID, or the PUBLIC_BOKUN_CHANNEL_ID env var). Until then — and if Bókun is blocked or
+  down — the same "request to book" block is shown instead.
 */
 interface Props { experienceId?: string; title?: string }
 const { experienceId, title = 'this tour' } = Astro.props;
 const channelId = SITE.bokunChannelId;
 const ready = Boolean(experienceId && channelId);
-const bookText = `Hi! I'd like to book ${title}.`;
+const es = getLangFromUrl(Astro.url) === 'es';
+const bookText = es ? `¡Hola! Quisiera reservar ${title}.` : `Hi! I'd like to book ${title}.`;
+const waHref = `https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(bookText)}`;
+const tr = {
+  soon: es ? 'Reservas online muy pronto' : 'Online booking opening soon',
+  soonBody: es
+    ? `Estamos activando la disponibilidad y la reserva instantánea de ${title}. Mientras tanto, reserva en minutos — respondemos rápido.`
+    : `Live availability & instant booking for ${title} are being set up. For now, reserve in minutes — we reply fast.`,
+  request: es ? 'Solicitar reserva' : 'Request to book',
+  enquire: es ? 'o envíanos una consulta →' : 'or send an enquiry →',
+  questions: es ? '¿Preguntas primero?' : 'Questions first?',
+  whatsapp: es ? 'Escríbenos por WhatsApp' : 'WhatsApp us',
+};
 ---
 {ready ? (
   <>
-    <div class="bokunWidget" data-src={`https://widgets.bokun.io/online-sales/${channelId}/experience-calendar/${experienceId}`}></div>
-    <script is:inline data-astro-rerun>
-      // Page transitions swap <body>, but Bókun boots once per page load and keeps watching the
-      // old body (it skips booting when these globals exist). Clear them so the loader below
-      // boots a fresh widget on this page.
-      delete window.__BokunWidgetsLoader;
-      delete window.BokunWidgets;
+    {/* Bókun's loader replaces this element's contents as its first action, so the fallback
+        below disappears when Bókun loads — and stays put when it is blocked or unreachable. */}
+    <div class="bokunWidget" data-src={`https://widgets.bokun.io/online-sales/${channelId}/experience-calendar/${experienceId}`}>
+      <div class="rounded-2xl border border-dashed border-brand-300 bg-brand-50/60 p-6 text-center">
+        <p class="text-sm text-ink-600">{tr.soonBody}</p>
+        <a href={waHref} target="_blank" rel="noopener" class="btn btn-primary mt-4 w-full">{tr.request}</a>
+        <a href={localizePath('/contact-us', es ? 'es' : 'en')} class="mt-2 inline-block text-sm font-medium text-brand-600 hover:underline">{tr.enquire}</a>
+      </div>
+    </div>
+    <script is:inline data-astro-rerun define:vars={{ channelId }}>
+      // Astro swaps <body> on navigation, but Bókun boots once per page load and its observer
+      // keeps watching the old body. Re-use the existing instance where possible (no second
+      // 500 KB bundle, no leaked listeners); otherwise clear its globals so the loader below
+      // boots it from scratch.
+      (() => {
+        const B = window.BokunWidgets;
+        if (B && typeof B.unmount === 'function' && typeof B.init === 'function') {
+          try {
+            B.unmount();
+            B.init({ bookingChannelUUID: channelId, origin: 'https://widgets.bokun.io' });
+            return;
+          } catch (e) { /* fall through to a fresh boot */ }
+        }
+        delete window.__BokunWidgetsLoader;
+        delete window.BokunWidgets;
+      })();
     </script>
     <script is:inline async data-astro-rerun src={`https://widgets.bokun.io/assets/javascripts/apps/build/BokunWidgetsLoader.js?bookingChannelUUID=${channelId}`}></script>
     <script is:inline data-astro-rerun>
-      // Safety net: Bókun booted but this widget didn't start (e.g. Bókun changed how it boots) —
-      // reload once so a normal page load takes over. Slow networks don't trigger it: the check
-      // only fires once Bókun itself has loaded.
+      // Safety net: Bókun booted but this widget never started — reload once (per page, per
+      // session) so a normal page load takes over. Never fires when Bókun is simply slow or
+      // blocked: it only runs once Bókun itself has loaded.
       (() => {
         const path = location.pathname;
         setTimeout(() => {
           const w = document.querySelector('.bokunWidget');
           if (!w || !window.BokunWidgets || w.hasAttribute('data-bokun-widget-loaded') || location.pathname !== path) return;
           try {
-            if (sessionStorage.getItem('bokun-reloaded') === path) return;
-            sessionStorage.setItem('bokun-reloaded', path);
+            const key = 'bokun-reloaded:' + path;
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
           } catch (e) { return; }
           location.reload();
         }, 4000);
       })();
     </script>
     <p class="mt-3 text-center text-xs text-ink-500">
-      Questions first? <a href={`https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(bookText)}`} target="_blank" rel="noopener" class="font-medium text-brand-600 hover:underline">WhatsApp us</a>
+      {tr.questions} <a href={waHref} target="_blank" rel="noopener" class="font-medium text-brand-600 hover:underline">{tr.whatsapp}</a>
     </p>
-    <noscript><a class="btn btn-primary w-full" href={`https://wa.me/${SITE.whatsappNumber}`}>Enquire to book</a></noscript>
+    <noscript><a class="btn btn-primary w-full" href={`https://wa.me/${SITE.whatsappNumber}`}>{tr.request}</a></noscript>
   </>
 ) : (
   <div class="rounded-2xl border border-dashed border-brand-300 bg-brand-50/60 p-6 text-center">
-    <p class="text-sm font-semibold uppercase tracking-wide text-brand-600">Online booking opening soon</p>
-    <p class="mt-2 text-sm text-ink-600">
-      Live availability &amp; instant booking for {title} are being set up. For now, reserve in
-      minutes — we reply fast.
-    </p>
-    <a href={`https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(bookText)}`}
-       target="_blank" rel="noopener" class="btn btn-primary mt-4 w-full">Request to book</a>
-    <a href="/contact-us" class="mt-2 inline-block text-sm font-medium text-brand-600 hover:underline">or send an enquiry →</a>
+    <p class="text-sm font-semibold uppercase tracking-wide text-brand-600">{tr.soon}</p>
+    <p class="mt-2 text-sm text-ink-600">{tr.soonBody}</p>
+    <a href={waHref} target="_blank" rel="noopener" class="btn btn-primary mt-4 w-full">{tr.request}</a>
+    <a href={localizePath('/contact-us', es ? 'es' : 'en')} class="mt-2 inline-block text-sm font-medium text-brand-600 hover:underline">{tr.enquire}</a>
   </div>
 )}

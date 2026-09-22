@@ -21,6 +21,6 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Frame-Options = "SAMEORIGIN"
     Strict-Transport-Security = "max-age=31536000"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(self \"https://widgets.bokun.io\")"
 
 # Redirects are maintained in public/_redirects.

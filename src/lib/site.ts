@@ -34,6 +34,11 @@ const settings = settingsData as Settings;
 const num = (settings.whatsappNumber || '593991946532').replace(/\D/g, '');
 const display = `+${num.slice(0, 3)} ${num.slice(3, 5)} ${num.slice(5, 8)} ${num.slice(8)}`.trimEnd();
 
+// Only a well-formed UUID switches live booking on — a stray space or newline pasted into
+// the Netlify env var would otherwise produce a broken widget URL.
+const rawChannel = (settings.bokunChannelId || import.meta.env.PUBLIC_BOKUN_CHANNEL_ID || '').trim();
+const bokunChannel = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawChannel) ? rawChannel : '';
+
 export const SITE = {
   name: settings.name,
   tagline: settings.tagline,
@@ -51,7 +56,7 @@ export const SITE = {
   instagramUrl: settings.instagramUrl,
   facebookUrl: settings.facebookUrl,
   // Bókun booking channel: Site settings first, env var as a fallback.
-  bokunChannelId: settings.bokunChannelId || import.meta.env.PUBLIC_BOKUN_CHANNEL_ID || '',
+  bokunChannelId: bokunChannel,
   hero: settings.hero,
 } as const;
 

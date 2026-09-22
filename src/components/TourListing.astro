@@ -2,11 +2,12 @@
 import Breadcrumbs from './Breadcrumbs.astro';
 import TourCard from './TourCard.astro';
 import { getTours, getTourTypes, getDestinations } from '../lib/content';
-import { getLangFromUrl, localizePath } from '../i18n/ui';
+import { getLangFromUrl, useTranslations, localizePath } from '../i18n/ui';
 import { SITE } from '../lib/site';
 
 const lang = getLangFromUrl(Astro.url);
 const es = lang === 'es';
+const t = useTranslations(lang);
 const L = (p: string) => localizePath(p, lang);
 const tours = await getTours();
 const types = await getTourTypes();
@@ -39,7 +40,7 @@ const tr = {
   full: es ? 'Día completo' : 'Full day',
   multi: es ? 'Varios días' : 'Multi-day',
   sort: es ? 'Ordenar' : 'Sort',
-  bookOnline: es ? 'Reserva online' : 'Book online',
+  bookOnline: t('label.bookOnline'),
   featured: es ? 'Destacados' : 'Featured',
   az: es ? 'Nombre A–Z' : 'Name A–Z',
   za: es ? 'Nombre Z–A' : 'Name Z–A',
@@ -86,7 +87,7 @@ const tr = {
     {anyLive && (
       <button type="button" id="filter-online" class="filter-chip !py-1.5" aria-pressed="false">{tr.bookOnline}</button>
     )}
-    <span id="result-count" class="text-sm font-medium text-ink-500"></span>
+    <span id="result-count" aria-live="polite" class="text-sm font-medium text-ink-500"></span>
   </div>
 
   <div id="tour-grid" class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
