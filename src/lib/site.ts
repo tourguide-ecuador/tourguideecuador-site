@@ -18,6 +18,7 @@ interface Settings {
   tripadvisorUrl?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
+  bokunChannelId?: string | null;
   hero: {
     eyebrow: string;
     heading: string;
@@ -49,6 +50,8 @@ export const SITE = {
   tripadvisorUrl: settings.tripadvisorUrl,
   instagramUrl: settings.instagramUrl,
   facebookUrl: settings.facebookUrl,
+  // Bókun booking channel: Site settings first, env var as a fallback.
+  bokunChannelId: settings.bokunChannelId || import.meta.env.PUBLIC_BOKUN_CHANNEL_ID || '',
   hero: settings.hero,
 } as const;
 

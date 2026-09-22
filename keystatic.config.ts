@@ -109,6 +109,16 @@ export default config({
         tripadvisorUrl: fields.url({ label: 'TripAdvisor URL' }),
         instagramUrl: fields.url({ label: 'Instagram URL' }),
         facebookUrl: fields.url({ label: 'Facebook URL' }),
+        bokunChannelId: fields.text({
+          label: 'Bókun booking channel UUID',
+          description: 'Turns on live booking for tours that have a Bókun experience ID. Find it in Bókun → Sales tools → Booking channels (your website channel). Leave empty to show "Request to book" instead.',
+          validation: {
+            pattern: {
+              regex: /^$|^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+              message: 'Paste the UUID exactly as Bókun shows it, e.g. 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d.',
+            },
+          },
+        }),
         hero: fields.object(
           {
             eyebrow: fields.text({ label: 'Eyebrow' }),
@@ -143,7 +153,11 @@ export default config({
         ),
         durationLabel: fields.text({ label: 'Duration label' }),
         priceFrom: fields.number({ label: 'Price from (USD) — optional, via Bokun' }),
-        bokunExperienceId: fields.text({ label: 'Bokun experience ID (⏳ later)' }),
+        bokunExperienceId: fields.text({
+          label: 'Bókun experience ID',
+          description: 'The number from Bókun → Experiences (e.g. 1286086), without the #. Add it only once the experience is Active in Bókun.',
+          validation: { pattern: { regex: /^\d*$/, message: 'Digits only, e.g. 1286086 (no # or spaces).' } },
+        }),
         featured: fields.checkbox({ label: 'Featured on homepage' }),
         excerpt: fields.text({ label: 'Excerpt', multiline: true, validation: { length: { min: 1 } } }),
         ...heroFields('tours', true),

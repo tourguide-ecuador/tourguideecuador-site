@@ -3,12 +3,13 @@ import { SITE } from '../lib/site';
 /*
   Bókun day-tour booking widget shell.
   Real bookings render once the client supplies each experience's Bókun ID
-  (frontmatter `bokunExperienceId`) and the channel UUID (PUBLIC_BOKUN_CHANNEL_ID).
+  (frontmatter `bokunExperienceId`) and the channel UUID (Site settings → Bókun booking
+  channel UUID, or the PUBLIC_BOKUN_CHANNEL_ID env var).
   Until then we show a clean "request to book" placeholder so the page is complete.
 */
 interface Props { experienceId?: string; title?: string }
 const { experienceId, title = 'this tour' } = Astro.props;
-const channelId = import.meta.env.PUBLIC_BOKUN_CHANNEL_ID;
+const channelId = SITE.bokunChannelId;
 const ready = Boolean(experienceId && channelId);
 const bookText = `Hi! I'd like to book ${title}.`;
 ---
