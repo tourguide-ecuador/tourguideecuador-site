@@ -10,6 +10,7 @@ interface Settings {
   tagline: string;
   email: string;
   whatsappNumber: string;
+  usPhone?: string | null;
   address: string;
   city: string;
   country: string;
@@ -32,6 +33,9 @@ interface Settings {
 const settings = settingsData as Settings;
 
 const num = (settings.whatsappNumber || '593991946532').replace(/\D/g, '');
+const us = (settings.usPhone || '').replace(/\D/g, '');
+const usOk = /^1\d{10}$/.test(us);
+
 const display = `+${num.slice(0, 3)} ${num.slice(3, 5)} ${num.slice(5, 8)} ${num.slice(8)}`.trimEnd();
 
 // Only a well-formed UUID switches live booking on — a stray space or newline pasted into
@@ -47,6 +51,10 @@ export const SITE = {
   whatsappNumber: num,
   whatsappDisplay: display, // e.g. "+593 99 194 6532"
   whatsappHref: `https://wa.me/${num}`,
+  // US line — only exposed when a valid 11-digit NANP number is set.
+  usPhone: usOk ? `+${us}` : '',
+  usPhoneDisplay: usOk ? `+1 (${us.slice(1, 4)}) ${us.slice(4, 7)}-${us.slice(7)}` : '', // "+1 (929) 810-3945"
+  usPhoneHref: usOk ? `tel:+${us}` : '',
   address: settings.address,
   city: settings.city,
   country: settings.country,

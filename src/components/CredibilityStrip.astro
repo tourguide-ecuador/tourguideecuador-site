@@ -37,12 +37,14 @@ const strong = dark ? 'text-white' : 'text-ink-900';
         {t('trust.licensed')}&nbsp;{SITE.licenseNumber}
       </span>
     </>)}
+    <!-- secure booking — only while Bókun online booking is switched on -->
+    {SITE.bokunChannelId && (<>
     <span class={`hidden h-4 w-px sm:block ${sep}`}></span>
-    <!-- secure booking -->
     <span class="flex items-center gap-2">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="text-brand-500"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
       {t('trust.secure')}
     </span>
+    </>)}
     <span class={`hidden h-4 w-px sm:block ${sep}`}></span>
     <!-- local guides -->
     <span class="flex items-center gap-2">

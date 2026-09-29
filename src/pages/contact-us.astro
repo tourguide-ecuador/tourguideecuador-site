@@ -31,6 +31,13 @@ import { SITE } from '../lib/site';
             <span><span class="block font-medium text-ink-900">WhatsApp</span>
               <a href={SITE.whatsappHref} target="_blank" rel="noopener" class="text-brand-600 hover:underline">{SITE.whatsappDisplay}</a></span>
           </li>
+          {SITE.usPhone && (
+            <li class="flex items-start gap-3">
+              <span class="mt-0.5 text-brand-500">☎</span>
+              <span><span class="block font-medium text-ink-900">Call us (US)</span>
+                <a href={SITE.usPhoneHref} class="text-brand-600 hover:underline">{SITE.usPhoneDisplay}</a></span>
+            </li>
+          )}
           <li class="flex items-start gap-3">
             <span class="mt-0.5 text-brand-500">✉</span>
             <span><span class="block font-medium text-ink-900">Email</span>

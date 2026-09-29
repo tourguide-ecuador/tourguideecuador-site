@@ -101,6 +101,7 @@ export default config({
         tagline: fields.text({ label: 'Tagline' }),
         email: fields.text({ label: 'Contact email', validation: { length: { min: 1 }, pattern: { regex: /^[^@\s]+@[^@\s]+\.[^@\s]+$/, message: 'Enter a valid email address.' } } }),
         whatsappNumber: fields.text({ label: 'WhatsApp number', description: 'Digits only, country code first (e.g. 593991946532).', validation: { pattern: { regex: /^\d{8,15}$/, message: 'Digits only, country code first — no spaces or +.' } } }),
+        usPhone: fields.text({ label: 'US phone number', description: 'Digits only, with the 1 country code (e.g. 19298103945). Shown as a call link. Leave empty to hide.', validation: { pattern: { regex: /^(1\d{10})?$/, message: 'Digits only: 1 followed by the 10-digit US number, no spaces or +.' } } }),
         address: fields.text({ label: 'Address', validation: { length: { min: 1 } } }),
         city: fields.text({ label: 'City' }),
         country: fields.text({ label: 'Country' }),

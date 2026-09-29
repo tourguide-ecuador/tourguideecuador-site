@@ -12,7 +12,14 @@ export function travelAgencySchema(rating?: { value: number; count: number }) {
     url: SITE.url,
     email: SITE.email,
     telephone: SITE.whatsappDisplay,
-    image: `${SITE.url}/favicon.svg`,
+    image: `${SITE.url}/logo.png`,
+    logo: `${SITE.url}/logo.png`,
+    ...(SITE.usPhone ? {
+      contactPoint: [
+        { '@type': 'ContactPoint', telephone: SITE.whatsappDisplay, contactType: 'customer service', areaServed: 'EC' },
+        { '@type': 'ContactPoint', telephone: SITE.usPhone, contactType: 'customer service', areaServed: 'US' },
+      ],
+    } : {}),
     description:
       'Quito-based travel agency for Galápagos cruises, island hopping and tailor-made Ecuador tours.',
     address: {
