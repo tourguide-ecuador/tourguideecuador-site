@@ -17,6 +17,7 @@ interface Settings {
   nytQuote: string;
   licenseNumber?: string | null;
   tripadvisorUrl?: string | null;
+  viatorUrl?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
   bokunChannelId?: string | null;
@@ -61,6 +62,7 @@ export const SITE = {
   nytQuote: settings.nytQuote,
   licenseNumber: settings.licenseNumber,
   tripadvisorUrl: settings.tripadvisorUrl,
+  viatorUrl: settings.viatorUrl,
   instagramUrl: settings.instagramUrl,
   facebookUrl: settings.facebookUrl,
   // Bókun booking channel: Site settings first, env var as a fallback.

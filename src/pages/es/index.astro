@@ -24,7 +24,7 @@ const rating = await aggregateRating();
   localized
   canonicalPath="/es"
   title="Tour Guide Ecuador — Cruceros Galápagos y Tours a Medida en Ecuador"
-  description="Agencia de viajes en Quito: cruceros a Galápagos, island hopping y tours de día por la Amazonía y los Andes. Viajes a medida con guías locales — recomendados por The New York Times."
+  description="Agencia de viajes en Quito: cruceros a Galápagos, lodges en la Amazonía y tours de día por los Andes. Viajes a medida con guías locales — recomendados por The New York Times."
 >
   <JsonLd slot="head" schema={travelAgencySchema(rating)} />
 
@@ -37,7 +37,7 @@ const rating = await aggregateRating();
         Las Galápagos y el corazón salvaje del Ecuador, a tu manera.
       </h1>
       <p class="reveal mt-6 max-w-xl text-lg leading-relaxed text-white/85" style="animation-delay:.2s">
-        Cruceros a Galápagos a medida, island hopping y tours de día por los Andes, la Amazonía y el
+        Cruceros a Galápagos a medida, lodges en la Amazonía y tours de día por los Andes y el
         bosque nublado — diseñados y guiados por locales que conocen cada isla y sendero.
       </p>
       <div class="reveal mt-9 flex flex-wrap items-center gap-4" style="animation-delay:.28s">
@@ -83,7 +83,7 @@ const rating = await aggregateRating();
       </div>
       <a href="/es/tours" class="btn btn-outline">Todos los tours de día →</a>
     </div>
-    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-reveal-stagger>
+    <div class={`mt-10 grid gap-6 sm:grid-cols-2 ${tours.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`} data-reveal-stagger>
       {tours.slice(0, 4).map((t) => <TourCard tour={t} />)}
     </div>
   </section>

@@ -135,7 +135,7 @@ const faqs = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/faqs' }),
   schema: z.object({
     question: z.string(),
-    category: z.enum(['cruises', 'tours', 'booking', 'practical']).default('cruises'),
+    category: z.enum(['cruises', 'tours', 'amazon', 'booking', 'practical']).default('cruises'),
     order: z.number().default(0),
   }),
 });

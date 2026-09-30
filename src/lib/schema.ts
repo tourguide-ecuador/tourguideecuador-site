@@ -21,7 +21,7 @@ export function travelAgencySchema(rating?: { value: number; count: number }) {
       ],
     } : {}),
     description:
-      'Quito-based travel agency for Galápagos cruises, island hopping and tailor-made Ecuador tours.',
+      'Quito-based travel agency for Galápagos cruises, Amazon lodges and tailor-made Ecuador tours.',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Versalles y Pérez Guerrero',
@@ -29,7 +29,7 @@ export function travelAgencySchema(rating?: { value: number; count: number }) {
       addressCountry: 'EC',
     },
     areaServed: ['Galápagos Islands', 'Ecuador'],
-    sameAs: [SITE.whatsappHref, SITE.tripadvisorUrl, SITE.instagramUrl, SITE.facebookUrl].filter(Boolean),
+    sameAs: [SITE.whatsappHref, SITE.tripadvisorUrl, SITE.viatorUrl, SITE.instagramUrl, SITE.facebookUrl].filter(Boolean),
     ...(rating && rating.count
       ? {
           aggregateRating: {

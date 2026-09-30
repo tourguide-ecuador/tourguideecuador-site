@@ -47,6 +47,12 @@ const tr = {
   noResults: es ? 'Ningún tour coincide — ' : 'No tours match those filters — ',
   tellUs: es ? 'cuéntanos qué buscas' : "tell us what you're after",
   word: es ? 'tours' : 'tours',
+  tmEyebrow: es ? 'Tours a medida' : 'Tailor-made tours',
+  tmTitle: es ? '¿Tienes un viaje soñado en mente?' : 'Have a dream trip in mind?',
+  tmBody: es
+    ? 'Cuéntanos el viaje de tus sueños y lo diseñamos para ti, con el mejor servicio y a un precio accesible.'
+    : "Tell us about your dream tour and we'll design it for you — the best service at an affordable price.",
+  tmCta: es ? 'Diseñar mi viaje' : 'Design my trip',
 };
 ---
 <section class="border-b border-sand-300 bg-sand-50">
@@ -100,6 +106,14 @@ const tr = {
       </div>
     ))}
   </div>
+  <aside class="mt-10 flex flex-col items-start gap-5 rounded-2xl border border-brand-200 bg-brand-50/70 p-7 sm:flex-row sm:items-center sm:justify-between sm:p-9">
+    <div class="max-w-2xl">
+      <p class="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">{tr.tmEyebrow}</p>
+      <h2 class="mt-2 font-display text-2xl font-medium text-ink-900 sm:text-3xl">{tr.tmTitle}</h2>
+      <p class="mt-2 text-ink-600">{tr.tmBody}</p>
+    </div>
+    <a href={L('/plan-my-trip')} class="btn btn-primary shrink-0">{tr.tmCta} →</a>
+  </aside>
   <p id="no-results" hidden class="py-12 text-center text-ink-500" data-word={tr.word}>{tr.noResults}<a class="text-brand-600 hover:underline" href={L('/plan-my-trip')}>{tr.tellUs}</a>.</p>
 </section>
 

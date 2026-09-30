@@ -25,7 +25,7 @@ const rating = await aggregateRating();
   overlayHeader
   localized
   title="Tour Guide Ecuador — Galápagos Cruises & Tailor-Made Ecuador Tours"
-  description="Quito-based travel agency for Galápagos cruises, island hopping, Amazon and Andes day tours. Tailor-made trips, expert local guides — recommended by The New York Times."
+  description="Quito-based travel agency for Galápagos cruises, Amazon lodges and Andes day tours. Tailor-made trips, expert local guides — recommended by The New York Times."
 >
   <JsonLd slot="head" schema={travelAgencySchema(rating)} />
 
@@ -92,7 +92,7 @@ const rating = await aggregateRating();
       </div>
       <a href="/tours" class="btn btn-outline">All day tours →</a>
     </div>
-    <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-reveal-stagger>
+    <div class={`mt-10 grid gap-6 sm:grid-cols-2 ${tours.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`} data-reveal-stagger>
       {tours.slice(0, 4).map((t) => <TourCard tour={t} />)}
     </div>
   </section>

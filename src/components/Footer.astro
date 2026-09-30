@@ -10,13 +10,13 @@ const es = lang === 'es';
 const year = new Date().getFullYear();
 const socials = [
   { label: 'TripAdvisor', href: SITE.tripadvisorUrl },
+  { label: 'Viator', href: SITE.viatorUrl },
   { label: 'Instagram', href: SITE.instagramUrl },
   { label: 'Facebook', href: SITE.facebookUrl },
 ].filter((s) => s.href);
 const cols = [
   { title: t('footer.galapagos'), links: [
     { label: es ? 'Todos los cruceros' : 'All cruises', href: '/cruises' },
-    { label: 'Island hopping', href: '/island-hopping-home' },
     { label: es ? 'Buceo' : 'Diving', href: '/diving' },
     { label: 'Galápagos & Machu Picchu', href: '/galapagos-machu-picchu' },
   ]},

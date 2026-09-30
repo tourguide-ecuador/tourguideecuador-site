@@ -108,6 +108,7 @@ export default config({
         nytQuote: fields.text({ label: 'Press / trust line', description: 'e.g. "Recommended by The New York Times".' }),
         licenseNumber: fields.text({ label: 'Tourism licence # (MINTUR)', description: 'Shown in the credibility strip & footer.' }),
         tripadvisorUrl: fields.url({ label: 'TripAdvisor URL' }),
+        viatorUrl: fields.url({ label: 'Viator URL', description: 'Your Viator operator or product page. Shown in the footer when set.' }),
         instagramUrl: fields.url({ label: 'Instagram URL' }),
         facebookUrl: fields.url({ label: 'Facebook URL' }),
         bokunChannelId: fields.text({
@@ -275,6 +276,7 @@ export default config({
           options: [
             { label: 'Galápagos cruises', value: 'cruises' },
             { label: 'Ecuador tours', value: 'tours' },
+            { label: 'Amazon tours', value: 'amazon' },
             { label: 'Booking & payment', value: 'booking' },
             { label: 'Travel & practical', value: 'practical' },
           ],
