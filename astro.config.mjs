@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
+import trailingSlashLinks from './integrations/trailing-slash-links.mjs';
 
 /**
  * Three build modes:
@@ -55,6 +56,8 @@ export default defineConfig({
     }),
     mdx(),
     ...extra.integrations,
+    // Keep last: rewrites internal links in the finished HTML to their trailing-slash URLs.
+    trailingSlashLinks(),
   ],
   image: { domains: [] },
   vite: {

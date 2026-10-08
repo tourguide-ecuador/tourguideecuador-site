@@ -186,3 +186,9 @@
 /tour-type/galapagos-land/  /cruises  301
 /es/tour-type/galapagos-land  /es/cruises  301
 /es/tour-type/galapagos-land/  /es/cruises  301
+
+# Oct 2026 — old WooCommerce tag archives and WordPress pagination (thin pages Google
+# still remembers). Send them somewhere useful instead of a 404.
+/product-tag/*  /tours/  301
+/destination/:slug/page/*  /destination/:slug/  301
+/es/destination/:slug/page/*  /es/destination/:slug/  301
