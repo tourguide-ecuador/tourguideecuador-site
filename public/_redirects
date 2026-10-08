@@ -192,3 +192,8 @@
 /product-tag/*  /tours/  301
 /destination/:slug/page/*  /destination/:slug/  301
 /es/destination/:slug/page/*  /es/destination/:slug/  301
+
+# Standard sitemap addresses (the old WordPress/Yoast ones are still registered in
+# Search Console) point at the real sitemap.
+/sitemap.xml  /sitemap-index.xml  301
+/sitemap_index.xml  /sitemap-index.xml  301
