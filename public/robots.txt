@@ -2,5 +2,7 @@
 User-agent: *
 Allow: /
 Disallow: /keystatic
+# Live Tripadvisor reviews load from here; their terms require it stays uncrawled.
+Disallow: /api/
 
 Sitemap: https://tourguideecuador.com/sitemap-index.xml

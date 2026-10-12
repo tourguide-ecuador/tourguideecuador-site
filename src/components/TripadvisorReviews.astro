@@ -1,0 +1,117 @@
+---
+// Live Tripadvisor rating + latest reviews, loaded in the browser from /api/tripadvisor
+// (netlify/functions/tripadvisor.mjs). Tripadvisor forbids caching review content or
+// putting it in the page HTML, so only the shell and a fallback link are rendered here;
+// the reviews are fetched when the block scrolls into view (which also keeps
+// pay-as-you-go API calls down). If the API is unavailable the fallback link stays.
+import { SITE } from '../lib/site';
+import { getLangFromUrl } from '../i18n/ui';
+interface Props { class?: string }
+const { class: cls = '' } = Astro.props;
+const es = getLangFromUrl(Astro.url) === 'es';
+const tr = es
+  ? { eyebrow: 'Opiniones en Tripadvisor', reviews: 'opiniones', on: 'en Tripadvisor', readMore: 'Leer más', more: 'Más en Tripadvisor', write: 'Escribir una opinión', fallback: 'Lee nuestras opiniones en Tripadvisor', translated: 'Traducido por Tripadvisor', loading: 'Cargando opiniones de Tripadvisor…' }
+  : { eyebrow: 'Reviews on Tripadvisor', reviews: 'reviews', on: 'on Tripadvisor', readMore: 'Read more', more: 'More on Tripadvisor', write: 'Write a review', fallback: 'Read our reviews on Tripadvisor', translated: 'Translated by Tripadvisor', loading: 'Loading Tripadvisor reviews…' };
+const listing = SITE.tripadvisorUrl;
+const writeReview = 'https://www.tripadvisor.com/UserReviewEdit-g294308-d10438426-TourGuideEcuador-Quito_Pichincha_Province.html';
+---
+{listing && (
+  <div class={`ta-reviews ${cls}`} data-ta-reviews data-lang={es ? 'es' : 'en'} data-i18n={JSON.stringify(tr)} data-write={writeReview}>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="eyebrow">{tr.eyebrow}</p>
+        <p class="ta-summary mt-2 flex flex-wrap items-center gap-3 text-ink-700" aria-live="polite">
+          <span class="ta-status text-sm text-ink-500">{tr.loading}</span>
+        </p>
+      </div>
+      <div class="ta-actions flex flex-wrap gap-3">
+        <a href={listing} target="_blank" rel="noopener" class="btn btn-outline">{tr.fallback} →</a>
+      </div>
+    </div>
+    <div class="ta-list mt-8 grid gap-6 md:grid-cols-3" hidden></div>
+  </div>
+)}
+
+<script is:inline data-astro-rerun>
+  (() => {
+    const root = document.querySelector('[data-ta-reviews]');
+    if (!root || root.dataset.state) return;
+    root.dataset.state = 'waiting';
+    const t = JSON.parse(root.dataset.i18n);
+    const lang = root.dataset.lang;
+    const el = (tag, cls, text) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    };
+    const link = (href, cls, text) => {
+      const a = el('a', cls, text);
+      a.href = href; a.target = '_blank'; a.rel = 'noopener';
+      return a;
+    };
+    const fmtDate = (iso) =>
+      new Date(iso).toLocaleDateString(lang === 'es' ? 'es-EC' : 'en-GB', { year: 'numeric', month: 'long' });
+
+    const render = (d) => {
+      const summary = root.querySelector('.ta-summary');
+      summary.replaceChildren();
+      if (d.ratingImage) {
+        const img = el('img', 'h-5 w-auto');
+        img.src = d.ratingImage; img.alt = `${d.rating} / 5`; img.width = 100; img.height = 20;
+        summary.append(img);
+      }
+      const score = el('span');
+      score.append(el('strong', '', d.rating?.toFixed(1)), ' · ');
+      score.append(link(d.url, 'font-medium text-brand-600 hover:underline', `${d.count} ${t.reviews} ${t.on}`));
+      summary.append(score);
+
+      const list = root.querySelector('.ta-list');
+      for (const r of d.reviews) {
+        const card = el('figure', 'flex h-full flex-col rounded-2xl border border-sand-300 bg-white p-6 shadow-card');
+        if (r.ratingImage) {
+          const b = el('img', 'h-4 w-auto self-start');
+          b.src = r.ratingImage; b.alt = `${r.rating} / 5`; b.width = 80; b.height = 16; b.loading = 'lazy';
+          card.append(b);
+        }
+        card.append(el('p', 'mt-3 font-display text-lg leading-snug text-ink-900', r.title));
+        const short = r.text.length > 260 ? r.text.slice(0, 260).replace(/\s+\S*$/, '') + '…' : r.text;
+        const quote = el('blockquote', 'mt-2 flex-1 text-[0.98rem] leading-relaxed text-ink-700', short);
+        card.append(quote);
+        if (short !== r.text) card.append(link(r.url, 'mt-2 self-start text-sm font-medium text-brand-600 hover:underline', `${t.readMore} →`));
+        const cap = el('figcaption', 'mt-5 border-t border-sand-200 pt-4 text-sm');
+        cap.append(el('span', 'block font-semibold text-ink-900', r.author));
+        cap.append(el('span', 'block text-xs text-ink-500', fmtDate(r.published) + (r.translated ? ` · ${t.translated}` : '')));
+        card.append(cap);
+        list.append(card);
+      }
+      list.hidden = d.reviews.length === 0;
+
+      const actions = root.querySelector('.ta-actions');
+      actions.replaceChildren(
+        link(d.url, 'btn btn-outline', `${t.more} →`),
+        link(root.dataset.write, 'btn btn-primary', t.write),
+      );
+      root.dataset.state = 'done';
+    };
+
+    const fail = () => {
+      root.querySelector('.ta-summary')?.replaceChildren();
+      root.dataset.state = 'failed';
+    };
+
+    const load = () => {
+      root.dataset.state = 'loading';
+      fetch(`/api/tripadvisor?lang=${lang}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+        .then((d) => (d && d.rating ? render(d) : fail()))
+        .catch(fail);
+    };
+
+    if (!('IntersectionObserver' in window)) return load();
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); load(); }
+    }, { rootMargin: '300px' });
+    io.observe(root);
+  })();
+</script>

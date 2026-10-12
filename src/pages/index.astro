@@ -5,6 +5,7 @@ import CruiseCard from '../components/CruiseCard.astro';
 import TourCard from '../components/TourCard.astro';
 import DestinationCard from '../components/DestinationCard.astro';
 import ReviewCard from '../components/ReviewCard.astro';
+import TripadvisorReviews from '../components/TripadvisorReviews.astro';
 import { SITE } from '../lib/site';
 import {
   featuredCruises, featuredTours, featuredDestinations, homeReviews, aggregateRating, getCruises,
@@ -110,6 +111,7 @@ const rating = await aggregateRating();
       <div class="mt-10 grid gap-6 md:grid-cols-3" data-reveal-stagger>
         {reviews.map((r) => <ReviewCard review={r} />)}
       </div>
+      <TripadvisorReviews class="mt-16 border-t border-sand-300 pt-12" />
     </div>
   </section>
 

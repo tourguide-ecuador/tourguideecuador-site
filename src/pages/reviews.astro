@@ -2,6 +2,7 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import ReviewCard from '../components/ReviewCard.astro';
+import TripadvisorReviews from '../components/TripadvisorReviews.astro';
 import Stars from '../components/Stars.astro';
 import JsonLd from '../components/JsonLd.astro';
 import { getReviews, aggregateRating } from '../lib/content';
@@ -35,6 +36,9 @@ const schemaReviews = reviews.map((r) => ({
         <span class="text-ink-600">“{SITE.nytQuote}”</span>
       </div>
     </div>
+  </section>
+  <section class="container-page pt-12">
+    <TripadvisorReviews />
   </section>
   <section class="container-page py-12">
     <div class="columns-1 gap-6 md:columns-2 lg:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid">
